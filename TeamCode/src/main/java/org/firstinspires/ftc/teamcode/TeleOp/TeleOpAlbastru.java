@@ -49,7 +49,7 @@ public class TeleOpAlbastru extends OpMode {
 
     public void loop(){
 
-
+       //va c=face cei ce stiu
     }
 
 

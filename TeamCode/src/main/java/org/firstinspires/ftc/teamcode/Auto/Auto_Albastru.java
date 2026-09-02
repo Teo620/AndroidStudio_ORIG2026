@@ -49,12 +49,13 @@ public class Auto_Albastru extends OpMode {
     public DcMotor LIFT = null;
     public DcMotor INTAKE=null;
     private final Pose startPose = new Pose(20,123,Math.toRadians(140));
-    private final Pose shootPose = new Pose(59,(84),Math.toRadians(180));
-    private final Pose GateTake=new Pose(10,(65),Math.toRadians(150));
+    private final Pose shootPose = new Pose(59,84,Math.toRadians(180));
+    private final Pose GateTake=new Pose(10,65,Math.toRadians(150));
+    private final Pose Stem =new Pose(40,15,Math.toRadians(180));
     private final Pose[] Parcari ={
-            new Pose(10,(65),Math.toRadians(150)),
-            new Pose(10,(65),Math.toRadians(150)),
-            new Pose(10,(65),Math.toRadians(150))};
+            new Pose(60,60,Math.toRadians(0)),  //case 1
+            new Pose(108,60,Math.toRadians(0)),  //case 2
+            new Pose(156,60,Math.toRadians(0))}; //case 3
     private Pose Parcare_Finala=new Pose(0,(0),Math.toRadians(0));
     Servo UNGHITURELA=null;
     Limelight3A limelight;

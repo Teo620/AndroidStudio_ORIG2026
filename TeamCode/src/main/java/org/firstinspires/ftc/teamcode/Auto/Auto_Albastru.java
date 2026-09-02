@@ -171,6 +171,7 @@ public class Auto_Albastru extends OpMode {
     public void loop(){
         follower.update();
         startPathUpdate();
+        telemetry.addData("ID OBELISK",TagID);
         telemetry.addData("FACEM LOOP",1);
         telemetry.update();
 

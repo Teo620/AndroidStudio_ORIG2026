@@ -27,6 +27,7 @@ public class TeleOp extends OpMode {
 
     private IMU imu;
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
+    public DcMotor Intake = null;
     public Servo ServoRotireComb = null;
     private Limelight3A limelight;
     int TagID;
@@ -41,6 +42,8 @@ public class TeleOp extends OpMode {
         RBMotor = hardwareMap.get(DcMotor.class, "rb");
         LFMotor.setDirection(DcMotor.Direction.REVERSE);
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
+
+        Intake = hardwareMap.get(DcMotor.class ,"intake");
 
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         imu = hardwareMap.get(IMU.class, "imu");
@@ -66,12 +69,17 @@ public class TeleOp extends OpMode {
 
     public void loop(){
 
-
-
-        if(gamepad1.squareWasPressed()){
+        if(gamepad1.squareWasPressed())
             InvertControl=!InvertControl;
-        }
+
         formula.driveJoystick(InvertControl);
+
+        if(gamepad1.right_trigger > 0)
+            Intake.setPower(0.5);
+        else if(gamepad1.left_trigger > 0)
+            Intake.setPower(-0.5);
+        else Intake.setPower(0);
+
     }
 
 

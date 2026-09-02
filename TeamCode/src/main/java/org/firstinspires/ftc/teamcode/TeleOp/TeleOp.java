@@ -42,9 +42,6 @@ public class TeleOp extends OpMode {
     public void loop(){
 
        //va c=face cei ce stiu
-
-
-
         formula.driveJoystick();
     }
 

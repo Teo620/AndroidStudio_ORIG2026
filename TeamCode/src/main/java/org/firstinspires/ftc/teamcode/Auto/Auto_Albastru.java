@@ -52,32 +52,39 @@ public class Auto_Albastru extends OpMode {
     private final Pose shootPose = new Pose(59,84,Math.toRadians(0));
     private final Pose GateTake=new Pose(10,65,Math.toRadians(0));
     private final Pose Stem =new Pose(40,15,Math.toRadians(-90));
-    private final Pose[] Parcari ={
+    private final Pose Polen =new Pose(228,36,Math.toRadians(0));
+    private final Pose[] Parkings ={
             new Pose(60,60,Math.toRadians(0)),  //case 1
             new Pose(108,60,Math.toRadians(0)),  //case 2
             new Pose(156,60,Math.toRadians(0))}; //case 3
-    private Pose Parcare_Finala=new Pose(0,(0),Math.toRadians(0));
+    private Pose Final_Park=new Pose(0,(0),Math.toRadians(0));
     Servo UNGHITURELA=null;
     Limelight3A limelight;
     IMU imu;
     int lastdistance=0;
     double pozitieservo;
     int TagID;
-    int facut=0;
-    private PathChain driveStartPosShootPos;
+    int facut=0, iteration=0;
+    private PathChain driveStartPosShootPos,driveStartPosPolen1,drivePolenStem1;
 
     public enum PathState{
-        startpos_shootpos, shoot, gate_take_come_back;
+        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop;
     }
 
     PathState pathState;
     Pose lastPose;
 
     public void buildPaths(){
-        driveStartPosShootPos= follower.pathBuilder()
-                .addPath(new BezierLine(startPose,shootPose))
-                .setLinearHeadingInterpolation(startPose.getHeading(),shootPose.getHeading())
+        driveStartPosPolen1= follower.pathBuilder()
+                .addPath(new BezierLine(startPose,Polen))
+                .setLinearHeadingInterpolation(startPose.getHeading(),Polen.getHeading())
                 .build();
+
+        drivePolenStem1= follower.pathBuilder()
+                .addPath(new BezierLine(Polen,Stem))
+                .setLinearHeadingInterpolation(Polen.getHeading(),Stem.getHeading())
+                .build();
+
 
     }
 
@@ -92,14 +99,41 @@ public class Auto_Albastru extends OpMode {
     public void startPathUpdate(){
         switch (pathState) {
 
-            case gate_take_come_back:
+            case startpos_Polen:
                 if(facut==0){
-                    follower.followPath(Drive(GateTake,shootPose), true);
+                    follower.followPath(Drive(startPose,Polen), true);
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    setPathState(PathState.shoot);
+                    setPathState(PathState.go_Stem);
                 }
+                break;
+
+            case go_Stem:
+                if(facut==0){
+
+                    // arunca mingile
+                    follower.followPath(Drive(follower.getPose(),Stem), true);
+                    facut=1;
+                }
+                if(!follower.isBusy()) {
+                    if(iteration==0)
+                    setPathState(PathState.go_Park);
+                }
+                break;
+
+            case go_Park:
+                if(facut==0){
+                    follower.followPath(Drive(follower.getPose(),Final_Park), true);
+                    facut=1;
+                }
+                if(!follower.isBusy()) {
+                    if(iteration==0)
+                        setPathState(PathState.stop);
+                }
+                break;
+
+            case stop:
                 break;
 
             default:    break;
@@ -125,7 +159,7 @@ public class Auto_Albastru extends OpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        pathState=PathState.startpos_shootpos;
+        pathState=PathState.startpos_Polen;
         pathTimer=new Timer();
         opModeTimer=new Timer();
         timp_pentru_tras_minge=new Timer();
@@ -165,7 +199,7 @@ public class Auto_Albastru extends OpMode {
             Case=2;
         }
 
-        Parcare_Finala=Parcari[Case];
+        Final_Park=Parkings[Case];
     }
 
     @Override

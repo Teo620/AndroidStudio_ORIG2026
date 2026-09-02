@@ -15,17 +15,7 @@ import com.pedropathing.geometry.Pose;
 
 public class Formula{
 
-    double a= -0.442938   ,b=0.01591484,c= -0.0001423681,d= 3.751802*Math.pow(10,-7);
-    ///SERVO APROAPE ^^^^^
-    //double v= 1917.083 ,w= -25.1759,x= 0.3320818,y= -0.001788796,z= 0.000003626389;
-    double v=-5579.287 ,w=302.7653,x=-5.366724,y=0.0473952,z=-0.0002066496,t=3.554927*Math.pow(10,-7);
-    ///TURELA APROAPE ^^^^^
 
-    double A=-31.75783,B=0.3065313,C=-0.0009778774,D=0.000001033435;
-    /// SERVO DEPARTE ^^^^
-    double X=7707.393 ,Y=-41.23281,Z=0.07037916;
-    /// TURELA DEPARTE ^^^^
-    double velocity,pozitieservo;
     public DcMotorEx intake = null;
     public DcMotorEx turela = null;
     public DcMotor lift = null;
@@ -103,13 +93,18 @@ public class Formula{
 
     }
 
-    public void driveJoystick() {
+    public void driveJoystick(boolean InvertControl) {
 
         double franademana = 1; //nefolosit, poate in viitor
+        int semn = 1;
 
-        double axial   = -gamepad1.left_stick_y;
-        double lateral =  gamepad1.left_stick_x;
-        double yaw     =  gamepad1.right_stick_x;
+        if(InvertControl)
+            semn = -1;
+        else semn = 1;
+
+        double axial   = -gamepad1.left_stick_y*semn;
+        double lateral =  gamepad1.left_stick_x*semn;
+        double yaw     =  gamepad1.right_stick_x*semn;
 
         double lfPow = axial + lateral + yaw;
         double rfPow = axial - lateral - yaw;

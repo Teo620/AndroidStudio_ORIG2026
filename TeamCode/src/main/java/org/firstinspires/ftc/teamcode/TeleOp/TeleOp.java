@@ -30,6 +30,8 @@ public class TeleOp extends OpMode {
     public Servo ServoRotireComb = null;
     private Limelight3A limelight;
     int TagID;
+
+    boolean InvertControl = false;
     @Override
     public void init(){
 
@@ -48,9 +50,9 @@ public class TeleOp extends OpMode {
         limelight.start();
         limelight.pipelineSwitch(0);
 
-        follower= Constants.createFollower(hardwareMap);
-        follower.setStartingPose(new Pose(20 ,123, Math.toRadians(140)));
-        follower.update();
+      //  follower= Constants.createFollower(hardwareMap);
+      //  follower.setStartingPose(new Pose(20 ,123, Math.toRadians(140)));
+      //  follower.update();
 
 
     }
@@ -64,10 +66,12 @@ public class TeleOp extends OpMode {
 
     public void loop(){
 
-       //va c=face cei ce stiu
 
 
-        formula.driveJoystick();
+        if(gamepad1.squareWasPressed()){
+            InvertControl=!InvertControl;
+        }
+        formula.driveJoystick(InvertControl);
     }
 
 

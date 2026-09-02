@@ -1,15 +1,19 @@
 package org.firstinspires.ftc.teamcode.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.SubSistems.Formula;
-
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="TeleOp", group="Linear OpMode")
@@ -24,7 +28,8 @@ public class TeleOp extends OpMode {
     private IMU imu;
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
     public Servo ServoRotireComb = null;
-
+    private Limelight3A limelight;
+    int TagID;
     @Override
     public void init(){
 
@@ -35,13 +40,33 @@ public class TeleOp extends OpMode {
         LFMotor.setDirection(DcMotor.Direction.REVERSE);
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
 
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP);
+        imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
+        limelight.start();
+        limelight.pipelineSwitch(0);
+
+        follower= Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(20 ,123, Math.toRadians(140)));
+        follower.update();
+
+
     }
 
-    public void start(){}
+
+
+    public void start()
+    {
+
+    }
 
     public void loop(){
 
        //va c=face cei ce stiu
+
+
         formula.driveJoystick();
     }
 

@@ -20,10 +20,6 @@ public class TeleOp extends OpMode {
 
 
     private IMU imu;
-    public DcMotorEx TURELA = null;
-
-    public DcMotor LIFT = null;
-
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
     public Servo ServoRotireComb = null;
 

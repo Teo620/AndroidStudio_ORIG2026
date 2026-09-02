@@ -17,8 +17,6 @@ public class TeleOp extends OpMode {
    private Formula formula = new Formula(); //Cele mai bune formule
 
     public FtcDashboard dashboard;
-
-
     private IMU imu;
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
     public Servo ServoRotireComb = null;

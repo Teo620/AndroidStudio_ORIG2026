@@ -1,0 +1,243 @@
+package org.firstinspires.ftc.teamcode;
+
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.pedropathing.geometry.Pose;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.teamcode.SubSisteme.Formula;
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+import org.firstinspires.ftc.teamcode.SubSisteme.TurretMechanismTutorial;
+import com.qualcomm.robotcore.hardware.CRServo;
+
+@Config
+@TeleOp(name="teleopalbastru", group="Linear OpMode")
+public class Referinta extends OpMode {
+    public static double pozitieservo=0.30;
+
+    private TurretMechanismTutorial turret = new TurretMechanismTutorial(); //Sistemul Stanga-Dreapta
+    private Formula formula = new Formula(); //Cele mai bune formule
+
+    public FtcDashboard dashboard;
+
+
+    private IMU imu;
+    public int franademana=2;
+    public DcMotorEx TURELA = null;
+
+    public DcMotor LIFT = null;
+
+    public DcMotor LFMotor = null;
+    public DcMotor LBMotor = null;
+    public DcMotor RFMotor=null;
+    public DcMotor RBMotor=null;
+    public DcMotorEx INTAKE=null;
+    public Servo UNGHITURELA=null;
+    public DcMotor ROTIRE = null;
+    public CRServo RRIntake = null;
+    public CRServo RLIntake = null;
+    private Limelight3A limelight;
+
+    public static double curTargetVelocity=0;
+    public static double test_vel=0;
+
+    public static double F=10,P=40,D=10,I=0.5;
+
+    public static int  power=0;
+    double lastdistance=0;
+    int mod=0;
+    ElapsedTime time_pinpoint =new ElapsedTime();
+    ElapsedTime timp_pentru_aruncat_minge= new ElapsedTime();
+
+    int ok=0;
+    public static double error=110;
+    public static double dif=0;
+    int MIN_TICKS = -700;
+    int MAX_TICKS = 700;
+    public double last_angle;
+    @Override
+    public void init() {
+
+        turret.init(hardwareMap);
+        formula.init(hardwareMap, gamepad1);
+        INTAKE =hardwareMap.get(DcMotorEx.class,"intake");
+        TURELA =hardwareMap.get(DcMotorEx.class,"turela");
+        LIFT =hardwareMap.get(DcMotor.class,"lift");
+        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        LFMotor = hardwareMap.get(DcMotor.class, "lf");
+        LBMotor = hardwareMap.get(DcMotor.class, "lb");
+        RFMotor = hardwareMap.get(DcMotor.class, "rf");
+        RBMotor = hardwareMap.get(DcMotor.class, "rb");
+        UNGHITURELA=hardwareMap.get(Servo.class, "unghiturela");
+        RRIntake = hardwareMap.get(CRServo.class, "RRIntake");
+        RLIntake = hardwareMap.get(CRServo.class, "RLIntake");
+        ROTIRE =hardwareMap.get(DcMotor.class,"rotire");
+        LFMotor.setDirection(DcMotor.Direction.REVERSE);
+        LBMotor.setDirection(DcMotor.Direction.REVERSE);
+        imu = hardwareMap.get(IMU.class, "imu");
+        RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.UP);
+        imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
+        limelight.start();
+        limelight.pipelineSwitch(0);
+        telemetry.addLine("Initialized all mechanisms");
+        turret.setkP(0.0220500);// update P and D on the fly
+        turret.setkD(0.0015010);
+        dashboard = FtcDashboard.getInstance();
+        TelemetryPacket packet =new TelemetryPacket();
+        packet.put("limiteservoaplicare", pozitieservo);
+
+        FtcDashboard.getInstance().sendTelemetryPacket(packet);
+        follower= Constants.createFollower(hardwareMap);
+        follower.setStartingPose(new Pose(20 ,123, Math.toRadians(140)));
+        follower.update();
+
+    }
+
+    public void start() {
+        turret.resetTimer();
+
+    }
+
+    @Override
+    public void loop() {
+        int goalx=15;
+        int goaly=130;
+
+        double ticksPerDegree=5.97;
+        follower.update();
+        telemetry.addData("pozitie servo",UNGHITURELA.getPosition());
+
+        telemetry.addData("last",lastdistance);
+
+        if(gamepad1.triangleWasPressed()) {
+            power = 1;
+            ok = 1;
+        }
+        if(gamepad1.circleWasPressed()){
+            curTargetVelocity=0;power=0;
+        }
+
+
+        limelight.updateRobotOrientation(Math.toDegrees(follower.getPose().getHeading()));
+        LLResult llResult = limelight.getLatestResult();
+
+        if(lastdistance>210) {
+            mod=1;
+            P=40;
+        }
+        else
+        {
+            mod=0;
+            P=40;
+        }
+
+        telemetry.addData("Distanta buna buna pateu bucegi",formula.get_DistancePinpoint(follower.getPose(),goalx,goaly));
+        curTargetVelocity=formula.get_Velocity(lastdistance,mod)*power;
+        pozitieservo=formula.get_ServoPos(lastdistance,mod);
+
+
+        if (power==0){
+            pozitieservo=0.35;
+            curTargetVelocity=0;
+        }
+
+
+        UNGHITURELA.setPosition(pozitieservo);
+
+
+        PIDFCoefficients pidfCoefficients = new PIDFCoefficients(P, I, D, F);
+        TURELA.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfCoefficients);
+        telemetry.addData("VELOCITY", curTargetVelocity);
+        TURELA.setVelocity(curTargetVelocity);
+
+        if(gamepad1.right_trigger>0) {
+
+            INTAKE.setPower(-0.5);
+            RLIntake.setPower(-1);
+            RRIntake.setPower(1);
+
+        }
+        else if(gamepad1.left_trigger>0) {
+            INTAKE.setPower(0.5);
+        }
+        else{
+            INTAKE.setPower(0);
+            RLIntake.setPower(0);
+            RRIntake.setPower(0);
+        }
+
+        if(gamepad1.right_bumper&&TURELA.getVelocity()>=curTargetVelocity-error)
+            LIFT.setPower(-0.35);
+
+        else if(gamepad1.left_bumper){
+            LIFT.setPower(0.35);
+        }
+        else  LIFT.setPower(0);
+
+        double targetAngle;
+
+        double roboty=follower.getPose().getX();
+        double robotx=follower.getPose().getY();
+        double robotheading=Math.toDegrees(follower.getPose().getHeading());
+        targetAngle=Math.toDegrees(Math.atan2(goaly-roboty,goalx-robotx));
+
+        double turretAngle=AngleUnit.normalizeDegrees(targetAngle - robotheading);
+        int turretTargetTicks=(int)(turretAngle*ticksPerDegree);
+        turretTargetTicks=Math.max(MIN_TICKS,Math.min(MAX_TICKS,turretTargetTicks));
+
+
+        limelight.updateRobotOrientation(Math.toDegrees(follower.getPose().getHeading()));
+        telemetry.addData("diferenta",TURELA.getVelocity()>=curTargetVelocity-40);
+        telemetry.addData("curvel",TURELA.getVelocity());
+        if (llResult != null && llResult.isValid()) {
+
+            telemetry.addData("cur ID", 21);
+            turret.update(llResult,0,dif);
+            telemetry.addData("DISTANTA", formula.Camera_Distance(llResult.getTa()));
+            lastdistance=formula.Camera_Distance(llResult.getTa());
+
+        }
+        else{
+            if(gamepad1.dpad_left){
+                turret.update(llResult,1,dif);
+                telemetry.addData("Schimbam spre stanga", "%.7f (D-Pad L/R)", turret.getkP());
+            }
+            else if(gamepad1.dpad_right){
+                turret.update(llResult,2,dif);
+                telemetry.addData("Schimbam spre dreapta", "%.7f (D-Pad L/R)", turret.getkP());
+            }
+            else{
+                turret.update(llResult,3,dif);
+                telemetry.addData("Nu schimbam", "%.7f (D-Pad L/R)", turret.getkP());
+            }
+              telemetry.addLine("No Tag Detected. Stopping Turret Motor");
+        }
+
+        telemetry.addData("TICK", turretTargetTicks);
+        telemetry.addData("X follower", roboty);
+        telemetry.addData("Y follower", robotx);
+        telemetry.addData("Yaw follower", robotheading);
+        telemetry.update();
+
+        formula.driveJoystick(); //Face tot ce trebe baiatu
+
+    }
+
+
+}

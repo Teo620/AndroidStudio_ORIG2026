@@ -44,15 +44,6 @@ public class Test_TeleOp extends OpMode {
         RBMotor = hardwareMap.get(DcMotor.class, "rb");
         LFMotor.setDirection(DcMotor.Direction.REVERSE);
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        Intake = hardwareMap.get(DcMotor.class ,"intake");
-        LGlis= hardwareMap.get(DcMotor.class, "lg");
-        RGlis = hardwareMap.get(DcMotor.class, "rg");
-        LGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        RGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        LGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LGlis.setDirection(DcMotorSimple.Direction.REVERSE);
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -64,6 +55,13 @@ public class Test_TeleOp extends OpMode {
 
         Intake = hardwareMap.get(DcMotor.class ,"intake");
         Clamp = hardwareMap.get(Servo.class ,"clamp");
+        LGlis= hardwareMap.get(DcMotor.class, "lg");
+        RGlis = hardwareMap.get(DcMotor.class, "rg");
+        LGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        LGlis.setDirection(DcMotorSimple.Direction.REVERSE);
     }
 
 
@@ -92,6 +90,20 @@ public class Test_TeleOp extends OpMode {
             Clamp.setPosition(0.50); //DESCHIS
         else if(gamepad1.triangle)
             Clamp.setPosition(0.3); //INCHIS
+
+
+        if(gamepad1.dpad_up){
+            RGlis.setPower(0.5);      //SUS
+            LGlis.setPower(0.5);
+        }
+        else if(gamepad1.dpad_down){
+            RGlis.setPower(-0.5);      //JOS
+            LGlis.setPower(-0.5);
+        }
+        else{
+            RGlis.setPower(0);      //Stai sefule
+            LGlis.setPower(0);
+        }
 
         /*
         Target_Pos += -gamepad1.right_stick_y * GSpeed;

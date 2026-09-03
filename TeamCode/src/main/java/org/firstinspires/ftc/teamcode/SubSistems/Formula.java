@@ -39,22 +39,22 @@ public class Formula{
 
         intake = hardwareMap.get(DcMotorEx.class, "intake");
         //turela = hardwareMap.get(DcMotorEx.class, "turela");
-        lift = hardwareMap.get(DcMotor.class, "lift");
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        //lift = hardwareMap.get(DcMotor.class, "lift");
+       // limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         lfMotor = hardwareMap.get(DcMotor.class, "lf");
         lbMotor = hardwareMap.get(DcMotor.class, "lb");
         rfMotor = hardwareMap.get(DcMotor.class, "rf");
         rbMotor = hardwareMap.get(DcMotor.class, "rb");
 
-        ServoRotireComb = hardwareMap.get(Servo.class, "servocomb");
+       // ServoRotireComb = hardwareMap.get(Servo.class, "servocomb");
 
         lfMotor.setDirection(DcMotor.Direction.REVERSE);
         lbMotor.setDirection(DcMotor.Direction.REVERSE);
         rfMotor.setDirection(DcMotor.Direction.FORWARD);
         rbMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        limelight.pipelineSwitch(0);
+       // limelight.pipelineSwitch(0);
 
         lfMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         lbMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

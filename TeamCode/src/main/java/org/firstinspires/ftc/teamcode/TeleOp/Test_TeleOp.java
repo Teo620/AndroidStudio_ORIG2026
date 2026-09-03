@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.SubSistems.Formula;
 @Config
 @com.qualcomm.robotcore.eventloop.opmode.TeleOp(name="test nebun", group="Linear OpMode")
 public class Test_TeleOp extends OpMode {
-  // private Formula formula = new Formula(); //Cele mai bune formule
+   //private Formula formula = new Formula(); //Cele mai bune formule
 
     public FtcDashboard dashboard;
 
@@ -29,7 +29,7 @@ public class Test_TeleOp extends OpMode {
    // private PIDFController pidf;
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
     public DcMotor Intake = null, RGlis = null, LGlis = null;
-    public Servo ServoRotireComb = null, Clamp = null, Servo_Polen = null;
+    public Servo ServoRotireComb = null, Clamp = null, Servo_Polen = null, Clamp_Angle = null;
     private Limelight3A limelight;
     int TagID, Target_Pos = 0, GSpeed = 5;
     public static double p = 0.008, i = 0, d = 0.0002 , f = 0.12;
@@ -38,12 +38,13 @@ public class Test_TeleOp extends OpMode {
     public void init(){
 
 
-        /*LFMotor = hardwareMap.get(DcMotor.class, "lf");
+        LFMotor = hardwareMap.get(DcMotor.class, "lf");
         LBMotor = hardwareMap.get(DcMotor.class, "lb");
         RFMotor = hardwareMap.get(DcMotor.class, "rf");
         RBMotor = hardwareMap.get(DcMotor.class, "rb");
         LFMotor.setDirection(DcMotor.Direction.REVERSE);
         LBMotor.setDirection(DcMotor.Direction.REVERSE);
+        /*
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -63,6 +64,7 @@ public class Test_TeleOp extends OpMode {
         RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RGlis.setDirection(DcMotorSimple.Direction.REVERSE);
         Servo_Polen = hardwareMap.get(Servo.class ,"polen");
+        Clamp_Angle = hardwareMap.get(Servo.class ,"angle");
     }
 
 
@@ -73,14 +75,45 @@ public class Test_TeleOp extends OpMode {
     }
 
     public void loop(){
-    /*
-        pidf.setPIDF(p, i, d, f);
+
+       // pidf.setPIDF(p, i, d, f);
 
         if(gamepad1.squareWasPressed())
             InvertControl=!InvertControl;
 
-        formula.driveJoystick(InvertControl);
-*/
+        //formula.driveJoystick(InvertControl);
+
+
+
+        int semn = 1;
+
+        if(InvertControl)
+            semn = -1;
+        else semn = 1;
+
+        double axial   = -gamepad1.left_stick_y*semn;
+        double lateral =  gamepad1.left_stick_x*semn;
+        double yaw     =  gamepad1.right_stick_x*semn;
+
+        double lfPow = axial + lateral + yaw;
+        double rfPow = axial - lateral - yaw;
+        double lbPow = axial - lateral + yaw;
+        double rbPow = axial + lateral - yaw;
+
+        double max = get_Max(lfPow,lbPow,rfPow,rbPow);
+
+        if (max > 1.0) {
+            lfPow /= max;
+            rfPow /= max;
+            lbPow /= max;
+            rbPow /= max;
+        }
+
+        LFMotor.setPower(lfPow);
+        RFMotor.setPower(rfPow);
+        LBMotor.setPower(lbPow);
+        RBMotor.setPower(rbPow);
+
         if(gamepad1.right_trigger > 0)
             Intake.setPower(0.61);
         else if(gamepad1.left_trigger > 0)
@@ -112,6 +145,31 @@ public class Test_TeleOp extends OpMode {
         else if(gamepad1.dpad_right)
             Servo_Polen.setPosition(0.30);
 
+        if(gamepad1.left_bumper)
+            Clamp_Angle.setPosition(0.4);
+        else if(gamepad1.right_bumper)
+            Clamp_Angle.setPosition(0.75);
+
+
+
+
+        if(gamepad2.dpad_up)
+            RBMotor.setPower(0.5);
+
+        if(gamepad2.dpad_down)
+            RFMotor.setPower(0.5);
+        if(gamepad2.dpad_left)
+            LFMotor.setPower(0.5);
+        if(gamepad2.dpad_right)
+            LBMotor.setPower(0.5);
+
+
+
+        if(gamepad1.left_bumper)
+            Clamp_Angle.setPosition(0.4);
+        else if(gamepad1.right_bumper)
+            Clamp_Angle.setPosition(0.75);
+
         /*
         Target_Pos += -gamepad1.right_stick_y * GSpeed;
         Target_Pos = clamp(Target_Pos,0,1000);
@@ -139,6 +197,13 @@ public class Test_TeleOp extends OpMode {
 
 
 
+
+
+
+
+
+
+
         /*
 
         ampu ii la mare
@@ -146,6 +211,13 @@ public class Test_TeleOp extends OpMode {
 
 
          */
+    }
+    public double get_Max(double p1,double p2, double p3, double p4){
+        double max=0;
+        max = Math.max(Math.abs(p1), Math.abs(p2));
+        max = Math.max(max, Math.abs(p3));
+        max = Math.max(max, Math.abs(p4));
+        return max;
     }
 
 

@@ -45,18 +45,16 @@ public class Auto_Albastru extends OpMode {
 
     private Timer pathTimer, opModeTimer,aux,shootTimer,timp_pentru_tras_minge,auxTime,timp_pentru_aruncat_minge;
 
-    public DcMotorEx TURELA = null;
-    public DcMotor LIFT = null;
-    public DcMotor INTAKE=null;
-    private final Pose startPose = new Pose(180,12,Math.toRadians(90));
-    private final Pose shootPose = new Pose(59,84,Math.toRadians(0));
-    private final Pose GateTake=new Pose(10,65,Math.toRadians(0));
-    private final Pose Stem =new Pose(40,15,Math.toRadians(-90));
-    private final Pose Polen =new Pose(228,36,Math.toRadians(0));
+    public DcMotor Intake = null, RGlis = null, LGlis = null;
+
+    public Servo Clamp = null, Servo_Polen = null;
+    private final Pose startPose = new Pose(132,180,Math.toRadians(90));
+    private final Pose Stem =new Pose(15,40,Math.toRadians(-90));
+    private final Pose Polen =new Pose(36,228,Math.toRadians(0));
     private final Pose[] Parkings ={
             new Pose(60,60,Math.toRadians(0)),  //case 1
-            new Pose(108,60,Math.toRadians(0)),  //case 2
-            new Pose(156,60,Math.toRadians(0))}; //case 3
+            new Pose(60,108,Math.toRadians(0)),  //case 2
+            new Pose(60,156,Math.toRadians(0))}; //case 3
     private Pose Final_Park=new Pose(0,(0),Math.toRadians(0));
     Servo UNGHITURELA=null;
     Limelight3A limelight;
@@ -101,10 +99,12 @@ public class Auto_Albastru extends OpMode {
 
             case startpos_Polen:
                 if(facut==0){
+                    Intake.setPower(0.65);
                     follower.followPath(Drive(startPose,Polen), true);
                     facut=1;
                 }
                 if(!follower.isBusy()) {
+                    Intake.setPower(0);
                     setPathState(PathState.go_Stem);
                 }
                 break;
@@ -148,9 +148,16 @@ public class Auto_Albastru extends OpMode {
     @Override
     public void init(){
 
-        INTAKE =hardwareMap.get(DcMotor.class,"intake");
-        //TURELA =hardwareMap.get(DcMotorEx.class,"turela");
-        LIFT =hardwareMap.get(DcMotor.class,"lift");
+        Intake = hardwareMap.get(DcMotor.class ,"intake");
+        Clamp = hardwareMap.get(Servo.class ,"clamp");
+        Servo_Polen = hardwareMap.get(Servo.class ,"polen");
+        LGlis= hardwareMap.get(DcMotor.class, "lg");
+        RGlis = hardwareMap.get(DcMotor.class, "rg");
+        LGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        RGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        LGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        RGlis.setDirection(DcMotor.Direction.REVERSE);
         imu = hardwareMap.get(IMU.class, "imu");
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,

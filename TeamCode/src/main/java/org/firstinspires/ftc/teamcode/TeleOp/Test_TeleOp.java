@@ -29,9 +29,9 @@ public class Test_TeleOp extends OpMode {
    // private PIDFController pidf;
     public DcMotor LFMotor = null, LBMotor = null, RFMotor=null, RBMotor=null;
     public DcMotor Intake = null, RGlis = null, LGlis = null;
-    public Servo ServoRotireComb = null, Clamp = null;
+    public Servo ServoRotireComb = null, Clamp = null, Servo_Polen = null;
     private Limelight3A limelight;
-    int TagID, Target_Pos = 0, GSpeed = 15;
+    int TagID, Target_Pos = 0, GSpeed = 5;
     public static double p = 0.008, i = 0, d = 0.0002 , f = 0.12;
     boolean InvertControl = false;
     @Override
@@ -61,7 +61,8 @@ public class Test_TeleOp extends OpMode {
         RGlis.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         LGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        LGlis.setDirection(DcMotorSimple.Direction.REVERSE);
+        RGlis.setDirection(DcMotorSimple.Direction.REVERSE);
+        Servo_Polen = hardwareMap.get(Servo.class ,"polen");
     }
 
 
@@ -81,9 +82,9 @@ public class Test_TeleOp extends OpMode {
         formula.driveJoystick(InvertControl);
 */
         if(gamepad1.right_trigger > 0)
-            Intake.setPower(1);
+            Intake.setPower(0.61);
         else if(gamepad1.left_trigger > 0)
-            Intake.setPower(-1);
+            Intake.setPower(-0.61);
         else Intake.setPower(0);
 
         if(gamepad1.cross)
@@ -104,6 +105,12 @@ public class Test_TeleOp extends OpMode {
             RGlis.setPower(0);      //Stai sefule
             LGlis.setPower(0);
         }
+
+
+        if(gamepad1.dpad_left)
+            Servo_Polen.setPosition(0);
+        else if(gamepad1.dpad_right)
+            Servo_Polen.setPosition(0.30);
 
         /*
         Target_Pos += -gamepad1.right_stick_y * GSpeed;

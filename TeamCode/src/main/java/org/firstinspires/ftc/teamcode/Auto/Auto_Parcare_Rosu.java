@@ -23,47 +23,45 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.SubSistems.Formula;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-import java.util.List;
 import java.util.List;import com.arcrobotics.ftclib.controller.PIDFController;
+
 @Config
-@Autonomous(name="Auto_Albastru", group="Linear OpMode")
-public class Auto_Albastru extends OpMode {
-    public DcMotor Intake = null, RGlis = null, LGlis = null;
+@Autonomous(name="Auto_Parcare_Rosu", group="Linear OpMode")
+public class Auto_Parcare_Rosu extends OpMode {
+
     private Follower follower;
     private Formula formula = new Formula();
 
     private Timer pathTimer, opModeTimer,aux,shootTimer,timp_pentru_tras_minge,auxTime,timp_pentru_aruncat_minge;
-    float Target_Pos=0;
+
     public DcMotorEx TURELA = null;
     public DcMotor LIFT = null;
     public DcMotor INTAKE=null;
     public Servo Clamp = null, Servo_Polen = null, Clamp_Angle = null;
-    private final Pose startPose = new Pose(180,132,Math.toRadians(0));
-    private final Pose Human =new Pose(20,108,Math.toRadians(0));
-    private final Pose Polen =new Pose(228,108,Math.toRadians(0));
+    private final Pose startPose = new Pose(180,12,Math.toRadians(0));
+    private final Pose Human =new Pose(40,20,Math.toRadians(0));
+    private final Pose Polen =new Pose(228,15,Math.toRadians(0));
     private final Pose[] Parkings ={
-            new Pose(60,84,Math.toRadians(0)),  //case 1
-            new Pose(108,84,Math.toRadians(0)),  //case 2
-            new Pose(132,84,Math.toRadians(0))}; //case 3
+            new Pose(167,60,Math.toRadians(0)),  //case 1
+            new Pose(142,60,Math.toRadians(0)),  //case 2
+            new Pose(70,60,Math.toRadians(0))}; //case 3
     private Pose Final_Park=new Pose(0,(0),Math.toRadians(0));
-    public static double p = 0.005, i = 0, d = 0.0003, f = 0.05;
+
     public double start_polen = 0, start_angle = 0.4, start_clamp = 0.5;
-    Servo UNGHITURELA=null;
     Limelight3A limelight;
     IMU imu;
-    int lastdistance=0;
-    double pozitieservo;
+    public static double p = 0.005, i = 0, d = 0.0003, f = 0.05;
+    float Target_Pos = 0, GSpeed = 1;
+    public DcMotor Intake = null, RGlis = null, LGlis = null;
     int TagID;
     int facut=0, iteration=0;
-    private PathChain driveStartPosShootPos,driveStartPosPolen1,drivePolenStem1;
 
     public enum PathState{
-        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop;
+        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop,startpos_Park;
     }
-
     private PIDFController pidf;
     private final Pose Comb =new Pose(180,36,Math.toRadians(-90));
-    Auto_Parcare_Rosu.PathState pathState;
+    PathState pathState;
     Pose lastPose;
 
     public void buildPaths(){}
@@ -79,15 +77,15 @@ public class Auto_Albastru extends OpMode {
     public void startPathUpdate(){
         switch (pathState) {
 
-            case startpos_Polen:
+            case startpos_Park:
                 if(facut==0){
 
                     INTAKE.setPower(0.7);
-                    follower.followPath(Drive(startPose,Polen), true);
+                    follower.followPath(Drive(startPose,Final_Park), true);
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    setPathState(Auto_Parcare_Rosu.PathState.go_Stem);
+                    setPathState(PathState.go_Park);
                 }
                 break;
 
@@ -96,8 +94,8 @@ public class Auto_Albastru extends OpMode {
 
                     follower.followPath(Drive(follower.getPose(),Human), true);
                     INTAKE.setPower(0);
-                    LGlis.setTargetPosition(400);
-                    RGlis.setTargetPosition(400);
+                    LGlis.setTargetPosition(200);
+                    RGlis.setTargetPosition(200);
                     Servo_Polen.setPosition(0.45);
 
                     if(pathTimer.getElapsedTimeSeconds() < 3)
@@ -118,7 +116,7 @@ public class Auto_Albastru extends OpMode {
                 }
                 if(!follower.isBusy()) {
                     if(iteration==0)
-                        setPathState(Auto_Parcare_Rosu.PathState.go_Park);
+                        setPathState(PathState.go_Park);
                 }
                 break;
 
@@ -129,7 +127,7 @@ public class Auto_Albastru extends OpMode {
                 }
                 if(!follower.isBusy()) {
                     if(iteration==0)
-                        setPathState(Auto_Parcare_Rosu.PathState.stop);
+                        setPathState(PathState.stop);
                 }
                 break;
 
@@ -143,7 +141,7 @@ public class Auto_Albastru extends OpMode {
             default:    break;
         }
     }
-    public void setPathState(Auto_Parcare_Rosu.PathState newState){
+    public void setPathState(PathState newState){
 
         pathState=newState;
         pathTimer.resetTimer();
@@ -173,7 +171,7 @@ public class Auto_Albastru extends OpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        pathState= Auto_Parcare_Rosu.PathState.startpos_Polen;
+        pathState= PathState.startpos_Park;
         pathTimer=new Timer();
         opModeTimer=new Timer();
         timp_pentru_tras_minge=new Timer();
@@ -226,7 +224,7 @@ public class Auto_Albastru extends OpMode {
             Case=0;
         }else if(TagID==22){
             Case=1;
-        }else{
+        }else if(TagID==23){
             Case=2;
         }
 
@@ -236,7 +234,7 @@ public class Auto_Albastru extends OpMode {
 
     @Override
     public void loop(){
-        // PIDF();
+       // PIDF();
         follower.update();
         startPathUpdate();
         telemetry.addData("Xpark",Final_Park.getX());
@@ -249,8 +247,28 @@ public class Auto_Albastru extends OpMode {
 
     }
 
+    public void PIDF(){
+        pidf.setPIDF(p, i, d, f);
+        Target_Pos = clamp(Target_Pos, 0, 150);
+        int Current_Pos = LGlis.getCurrentPosition();
+        double power = pidf.calculate(Current_Pos, Target_Pos);
+        power = clamp(power, -0.4, 0.4);
+        telemetry.addData("LGlis Pos", LGlis.getCurrentPosition());
+        telemetry.addData("Target", Target_Pos);
+        telemetry.addData("Power", power);
+        telemetry.update();
+
+
+
+        LGlis.setPower(power);
+        RGlis.setPower(power);
+        
+    }
+
 
 }
+
+
 
 
 

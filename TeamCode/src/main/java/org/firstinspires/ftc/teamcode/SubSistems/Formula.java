@@ -104,7 +104,7 @@ public class Formula{
 
         double axial   = -gamepad1.left_stick_y*semn;
         double lateral =  gamepad1.left_stick_x*semn;
-        double yaw     =  gamepad1.right_stick_x*semn;
+        double yaw     =  gamepad1.right_stick_x;
 
         double lfPow = axial + lateral + yaw;
         double rfPow = axial - lateral - yaw;

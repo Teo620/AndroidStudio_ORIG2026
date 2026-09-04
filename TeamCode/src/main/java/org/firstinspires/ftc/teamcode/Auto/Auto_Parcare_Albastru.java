@@ -26,14 +26,14 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 import java.util.List;
 import java.util.List;import com.arcrobotics.ftclib.controller.PIDFController;
 @Config
-@Autonomous(name="Auto_Albastru", group="Linear OpMode")
-public class Auto_Albastru extends OpMode {
+@Autonomous(name="Auto_Parcare_ALbastru+", group="Linear OpMode")
+public class Auto_Parcare_Albastru extends OpMode {
     public DcMotor Intake = null, RGlis = null, LGlis = null;
     private Follower follower;
     private Formula formula = new Formula();
 
     private Timer pathTimer, opModeTimer,aux,shootTimer,timp_pentru_tras_minge,auxTime,timp_pentru_aruncat_minge;
-    float Target_Pos=0;
+float Target_Pos=0;
     public DcMotorEx TURELA = null;
     public DcMotor LIFT = null;
     public DcMotor INTAKE=null;
@@ -44,21 +44,18 @@ public class Auto_Albastru extends OpMode {
     private final Pose[] Parkings ={
             new Pose(60,84,Math.toRadians(0)),  //case 1
             new Pose(108,84,Math.toRadians(0)),  //case 2
-            new Pose(132,84,Math.toRadians(0))}; //case 3
+            new Pose(156,84,Math.toRadians(0))}; //case 3
     private Pose Final_Park=new Pose(0,(0),Math.toRadians(0));
     public static double p = 0.005, i = 0, d = 0.0003, f = 0.05;
     public double start_polen = 0, start_angle = 0.4, start_clamp = 0.5;
-    Servo UNGHITURELA=null;
     Limelight3A limelight;
     IMU imu;
-    int lastdistance=0;
-    double pozitieservo;
     int TagID;
     int facut=0, iteration=0;
     private PathChain driveStartPosShootPos,driveStartPosPolen1,drivePolenStem1;
 
     public enum PathState{
-        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop;
+        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop,startpos_Park;
     }
 
     private PIDFController pidf;
@@ -79,15 +76,15 @@ public class Auto_Albastru extends OpMode {
     public void startPathUpdate(){
         switch (pathState) {
 
-            case startpos_Polen:
+            case startpos_Park:
                 if(facut==0){
 
                     INTAKE.setPower(0.7);
-                    follower.followPath(Drive(startPose,Polen), true);
+                    follower.followPath(Drive(startPose,Final_Park), true);
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    setPathState(Auto_Parcare_Rosu.PathState.go_Stem);
+                    setPathState(Auto_Parcare_Rosu.PathState.go_Park);
                 }
                 break;
 
@@ -173,7 +170,7 @@ public class Auto_Albastru extends OpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        pathState= Auto_Parcare_Rosu.PathState.startpos_Polen;
+        pathState= Auto_Parcare_Rosu.PathState.startpos_Park;
         pathTimer=new Timer();
         opModeTimer=new Timer();
         timp_pentru_tras_minge=new Timer();

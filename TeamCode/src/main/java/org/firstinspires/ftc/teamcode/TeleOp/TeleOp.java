@@ -26,7 +26,7 @@ public class TeleOp extends OpMode {
 
     public FtcDashboard dashboard;
 
-
+    public double start_polen = 0, start_angle = 0.7, start_clamp = 0.5;
     private PIDFController pidf;
 
     private IMU imu;
@@ -36,7 +36,7 @@ public class TeleOp extends OpMode {
     public Servo Clamp = null, Servo_Polen = null, Clamp_Angle = null;
     public Servo ServoRotireComb = null;
     private Limelight3A limelight;
-    int TagID;
+    int TagID,ok=0,ok_clema=0,ok_polen=0;
     float Target_Pos = 0, GSpeed = 1;
 
     public static double p = 0.005, i = 0, d = 0.0003, f = 0.05;
@@ -67,7 +67,7 @@ public class TeleOp extends OpMode {
         RGlis.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         RGlis.setDirection(DcMotor.Direction.REVERSE);
 
-/*
+
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
@@ -75,7 +75,11 @@ public class TeleOp extends OpMode {
         imu.initialize(new IMU.Parameters(revHubOrientationOnRobot));
         limelight.start();
         limelight.pipelineSwitch(0);
-*/
+
+        Clamp.setPosition(start_clamp);
+        Clamp_Angle.setPosition(start_angle);
+        Servo_Polen.setPosition(start_polen);
+
     }
 
 
@@ -90,7 +94,7 @@ public class TeleOp extends OpMode {
         if (gamepad1.squareWasPressed())
             InvertControl = !InvertControl;
 
-        // formula.driveJoystick(InvertControl);
+        formula.driveJoystick(InvertControl);
 
         if (gamepad1.right_trigger > 0)
             Intake.setPower(1);
@@ -98,20 +102,55 @@ public class TeleOp extends OpMode {
             Intake.setPower(-1);
         else Intake.setPower(0);
 
-        if (gamepad1.cross)
-            Clamp.setPosition(0.50); //DESCHIS
-        else if (gamepad1.triangle)
-            Clamp.setPosition(0.3); //INCHIS
+        if (gamepad1.crossWasPressed())
+        {
+            if(ok_clema==0){
+                Clamp.setPosition(0.7); //DESCHIS
+                ok_clema=1;
+            }else{
+                Clamp.setPosition(0.3); //INCHIS
+                ok_clema=0;
+            }
 
-        if (gamepad1.dpad_left)
-            Servo_Polen.setPosition(0);
-        else if (gamepad1.dpad_right)
-            Servo_Polen.setPosition(0.67);
+        }
+
+        if (gamepad1.triangleWasPressed()){
+            if(ok_polen==0){
+                Servo_Polen.setPosition(0); //INCHIS
+                ok_polen=1;
+            }else{
+                Servo_Polen.setPosition(0.45); //DESCHIS
+                ok_polen=0;
+            }
+        }
+        if (gamepad1.dpad_right){
+            Clamp_Angle.setPosition(0.4);
+        }
 
         if (gamepad1.right_bumper)
-            Clamp_Angle.setPosition(0.4);
+            Clamp_Angle.setPosition(0.6); //SUS
         else if (gamepad1.left_bumper)
-            Clamp_Angle.setPosition(0.7);
+            Clamp_Angle.setPosition(0.75);  //JOS
+
+        if(gamepad1.circleWasPressed())
+        {
+            if(ok==0)
+            {
+                ok=1;
+                Clamp_Angle.setPosition(0.6);  //Deschis tati
+                Clamp.setPosition(0.7);
+                Servo_Polen.setPosition(0.45);
+                Target_Pos=50;
+            }
+            else{
+                Clamp_Angle.setPosition(0.75);  //Inchis tati
+                Clamp.setPosition(0.4);
+                Servo_Polen.setPosition(0);
+                Target_Pos=0;
+                ok=0;
+            }
+
+        }
 
 
         //  LOGICA GLISIERE
@@ -122,66 +161,21 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpad_down)
             Target_Pos -= GSpeed;
 
-        Target_Pos = clamp(Target_Pos, 0, 100);
+        Target_Pos = clamp(Target_Pos, 0, 160);
         int Current_Pos = LGlis.getCurrentPosition();
         double power = pidf.calculate(Current_Pos, Target_Pos);
-        power = clamp(power, -0.3, 0.3);
+        power = clamp(power, -0.4, 0.4);
+
+
         LGlis.setPower(power);
         RGlis.setPower(power);
 
 
+        telemetry.addData("Case Pos", RGlis.getCurrentPosition());
         telemetry.addData("RGlis Pos", RGlis.getCurrentPosition());
         telemetry.addData("LGlis Pos", LGlis.getCurrentPosition());
-
         telemetry.addData("Target", Target_Pos);
-
-
-
-
-
-
-
-/*
-
-        int semn = 1;
-        if(InvertControl)
-            semn = -1;
-        else semn = 1;
-
-        double axial   = -gamepad1.left_stick_y*semn;
-        double lateral =  gamepad1.left_stick_x;
-        double yaw     =  gamepad1.right_stick_x*semn;
-
-        double lfPow = axial + lateral + yaw;
-        double rfPow = axial - lateral - yaw;
-        double lbPow = axial - lateral + yaw;
-        double rbPow = axial + lateral - yaw;
-
-        double max = get_Max(lfPow,lbPow,rfPow,rbPow);
-
-        if (max > 1.0) {
-            lfPow /= max;
-            rfPow /= max;
-            lbPow /= max;
-            rbPow /= max;
-        }
-
-        LFMotor.setPower(lfPow);
-        RFMotor.setPower(rfPow);
-        LBMotor.setPower(lbPow);
-        RBMotor.setPower(rbPow);
-
-    }
-
-
-
-    public double get_Max(double p1,double p2, double p3, double p4){
-        double max=0;
-        max = Math.max(Math.abs(p1), Math.abs(p2));
-        max = Math.max(max, Math.abs(p3));
-        max = Math.max(max, Math.abs(p4));
-        return max;
-    }
-*/
+        telemetry.addData("Power", power);
+        telemetry.update();
     }
 }

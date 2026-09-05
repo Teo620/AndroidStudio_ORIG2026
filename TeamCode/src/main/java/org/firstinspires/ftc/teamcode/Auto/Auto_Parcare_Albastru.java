@@ -132,9 +132,7 @@ float Target_Pos=0;
 
             case stop:
 
-                LGlis.setTargetPosition(0);
-                RGlis.setTargetPosition(0);
-                INTAKE.setPower(0);
+                Clamp_Angle.setPosition(0.45);
                 break;
 
             default:    break;

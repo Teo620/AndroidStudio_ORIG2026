@@ -39,8 +39,8 @@ public class Auto_Rosu extends OpMode {
     public DcMotor INTAKE=null;
     public Servo Clamp = null, Servo_Polen = null, Clamp_Angle = null;
     private final Pose startPose = new Pose(180,12,Math.toRadians(0));
-    private final Pose Human =new Pose(40,20,Math.toRadians(0));
-    private final Pose Polen =new Pose(228,15,Math.toRadians(0));
+    private final Pose Human =new Pose(40,36,Math.toRadians(0));
+    private final Pose Polen =new Pose(228,36,Math.toRadians(0));
     private final Pose[] Parkings ={
             new Pose(167,60,Math.toRadians(0)),  //case 1
             new Pose(142,60,Math.toRadians(0)),  //case 2
@@ -85,7 +85,7 @@ public class Auto_Rosu extends OpMode {
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    setPathState(PathState.go_Stem);
+                    setPathState(PathState.go_Park);
                 }
                 break;
 

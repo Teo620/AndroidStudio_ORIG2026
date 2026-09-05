@@ -38,16 +38,16 @@ public class Auto_Parcare_Rosu extends OpMode {
     public DcMotor LIFT = null;
     public DcMotor INTAKE=null;
     public Servo Clamp = null, Servo_Polen = null, Clamp_Angle = null;
-    private final Pose startPose = new Pose(180,12,Math.toRadians(0));
+    private final Pose startPose = new Pose(156,12,Math.toRadians(0));
     private final Pose Human =new Pose(40,20,Math.toRadians(0));
     private final Pose Polen =new Pose(228,15,Math.toRadians(0));
     private final Pose[] Parkings ={
-            new Pose(167,60,Math.toRadians(0)),  //case 1
-            new Pose(142,60,Math.toRadians(0)),  //case 2
-            new Pose(70,60,Math.toRadians(0))}; //case 3
+            new Pose(180,60,Math.toRadians(0)),  //case 1
+            new Pose(132,60,Math.toRadians(0)),  //case 2
+            new Pose(84,60,Math.toRadians(0))}; //case 3
     private Pose Final_Park=new Pose(0,(0),Math.toRadians(0));
 
-    public double start_polen = 0, start_angle = 0.4, start_clamp = 0.5;
+    public double start_polen = 0, start_angle = 0.3, start_clamp = 0.6;
     Limelight3A limelight;
     IMU imu;
     public static double p = 0.005, i = 0, d = 0.0003, f = 0.05;
@@ -79,8 +79,9 @@ public class Auto_Parcare_Rosu extends OpMode {
 
             case startpos_Park:
                 if(facut==0){
-
-                    INTAKE.setPower(0.7);
+                    if(pathTimer.getElapsedTimeSeconds()<5)
+                        break;
+                   // INTAKE.setPower(0.7);
                     follower.followPath(Drive(startPose,Final_Park), true);
                     facut=1;
                 }
@@ -133,9 +134,11 @@ public class Auto_Parcare_Rosu extends OpMode {
 
             case stop:
 
-                LGlis.setTargetPosition(0);
-                RGlis.setTargetPosition(0);
-                INTAKE.setPower(0);
+               // LGlis.setTargetPosition(0);
+               // RGlis.setTargetPosition(0);
+                //INTAKE.setPower(0);
+                Clamp_Angle.setPosition(start_angle);
+                Clamp_Angle.setPosition(0.45);
                 break;
 
             default:    break;

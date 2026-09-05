@@ -39,8 +39,8 @@ public class Auto_Albastru extends OpMode {
     public DcMotor INTAKE=null;
     public Servo Clamp = null, Servo_Polen = null, Clamp_Angle = null;
     private final Pose startPose = new Pose(180,132,Math.toRadians(0));
-    private final Pose Human =new Pose(20,108,Math.toRadians(0));
-    private final Pose Polen =new Pose(228,108,Math.toRadians(0));
+    private final Pose Human =new Pose(20,100,Math.toRadians(0));
+    private final Pose Polen =new Pose(228,100,Math.toRadians(0));
     private final Pose[] Parkings ={
             new Pose(60,84,Math.toRadians(0)),  //case 1
             new Pose(108,84,Math.toRadians(0)),  //case 2
@@ -57,13 +57,14 @@ public class Auto_Albastru extends OpMode {
     int facut=0, iteration=0;
     private PathChain driveStartPosShootPos,driveStartPosPolen1,drivePolenStem1;
 
-    public enum PathState{
-        startpos_Polen, Polen_Stem, Stem_Polen2, go_Stem, go_Park, stop;
-    }
+
 
     private PIDFController pidf;
     private final Pose Comb =new Pose(180,36,Math.toRadians(-90));
-    Auto_Parcare_Rosu.PathState pathState;
+    PathState pathState;
+    public enum PathState{
+        startpos_Polen, Polen_Stem, Stem_Polen2, go_Polen, go_Park, stop,go_Human,release;
+    }
     Pose lastPose;
 
     public void buildPaths(){}
@@ -87,38 +88,18 @@ public class Auto_Albastru extends OpMode {
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    setPathState(Auto_Parcare_Rosu.PathState.go_Stem);
+                    setPathState(PathState.go_Human);
                 }
                 break;
 
-            case go_Stem:
+            case go_Human:
                 if(facut==0){
 
                     follower.followPath(Drive(follower.getPose(),Human), true);
-                    INTAKE.setPower(0);
-                    LGlis.setTargetPosition(400);
-                    RGlis.setTargetPosition(400);
-                    Servo_Polen.setPosition(0.45);
-
-                    if(pathTimer.getElapsedTimeSeconds() < 3)
-                        break;
-
-                    Clamp_Angle.setPosition(0.75);
-
-                    if(pathTimer.getElapsedTimeSeconds() <= 6)
-                        break;
-                    Clamp.setPosition(0.7);
-
-                    if(pathTimer.getElapsedTimeSeconds() <= 9)
-                        break;
-
                     facut=1;
-
-
                 }
                 if(!follower.isBusy()) {
-                    if(iteration==0)
-                        setPathState(Auto_Parcare_Rosu.PathState.go_Park);
+                    setPathState(PathState.go_Park);
                 }
                 break;
 
@@ -128,22 +109,48 @@ public class Auto_Albastru extends OpMode {
                     facut=1;
                 }
                 if(!follower.isBusy()) {
-                    if(iteration==0)
-                        setPathState(Auto_Parcare_Rosu.PathState.stop);
+                        setPathState(PathState.stop);
                 }
                 break;
 
+            case release:
+                if(facut==0){
+
+                    INTAKE.setPower(0);
+                    LGlis.setTargetPosition(400);
+                    RGlis.setTargetPosition(400);
+
+
+                    if(pathTimer.getElapsedTimeSeconds() < 6)
+                        break;
+                    Servo_Polen.setPosition(0.45);
+
+                    if(pathTimer.getElapsedTimeSeconds() <= 5)
+                        break;
+
+                   // if(pathTimer.getElapsedTimeSeconds() <= 9)
+                    //    break;
+
+                    facut=1;
+
+
+                }
+                if(!follower.isBusy()) {
+                        setPathState(PathState.go_Park);
+                }
+
+                break;
             case stop:
 
-                LGlis.setTargetPosition(0);
-                RGlis.setTargetPosition(0);
+                LGlis.setTargetPosition(1);
+                RGlis.setTargetPosition(1);
                 INTAKE.setPower(0);
                 break;
 
             default:    break;
         }
     }
-    public void setPathState(Auto_Parcare_Rosu.PathState newState){
+    public void setPathState(PathState newState){
 
         pathState=newState;
         pathTimer.resetTimer();
@@ -173,7 +180,7 @@ public class Auto_Albastru extends OpMode {
         limelight.pipelineSwitch(0);
         limelight.start();
 
-        pathState= Auto_Parcare_Rosu.PathState.startpos_Polen;
+        pathState= PathState.startpos_Polen;
         pathTimer=new Timer();
         opModeTimer=new Timer();
         timp_pentru_tras_minge=new Timer();

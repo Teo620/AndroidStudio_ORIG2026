@@ -26,7 +26,8 @@ public class TeleOp extends OpMode {
 
     public FtcDashboard dashboard;
 
-    public double start_polen = 0, start_angle = 0.7, start_clamp = 0.5;
+    public double start_polen = 0, start_angle = 0.3, start_clamp = 0.6;
+    public double polen0 = 0, start_angle0 = 0.4, start_clamp0 = 0.5;
     private PIDFController pidf;
 
     private IMU imu;
@@ -105,10 +106,10 @@ public class TeleOp extends OpMode {
         if (gamepad1.crossWasPressed())
         {
             if(ok_clema==0){
-                Clamp.setPosition(0.7); //DESCHIS
+                Clamp.setPosition(0.9); //DESCHIS
                 ok_clema=1;
             }else{
-                Clamp.setPosition(0.3); //INCHIS
+                Clamp.setPosition(0.6); //INCHIS
                 ok_clema=0;
             }
 
@@ -123,34 +124,37 @@ public class TeleOp extends OpMode {
                 ok_polen=0;
             }
         }
-        if (gamepad1.dpad_right){
-            Clamp_Angle.setPosition(0.4);
-        }
 
+
+        if (gamepad1.dpad_right){
+            Clamp_Angle.setPosition(0.4); //sus de tot
+        }
         if (gamepad1.right_bumper)
             Clamp_Angle.setPosition(0.6); //SUS
         else if (gamepad1.left_bumper)
             Clamp_Angle.setPosition(0.75);  //JOS
 
-        if(gamepad1.circleWasPressed())
+       /* if(gamepad1.circleWasPressed())
         {
             if(ok==0)
             {
                 ok=1;
                 Clamp_Angle.setPosition(0.6);  //Deschis tati
-                Clamp.setPosition(0.7);
+                Clamp.setPosition(0.9);
                 Servo_Polen.setPosition(0.45);
                 Target_Pos=50;
             }
             else{
                 Clamp_Angle.setPosition(0.75);  //Inchis tati
-                Clamp.setPosition(0.4);
+                Clamp.setPosition(0.6);
                 Servo_Polen.setPosition(0);
                 Target_Pos=0;
                 ok=0;
             }
 
         }
+        */
+
 
 
         //  LOGICA GLISIERE
@@ -161,7 +165,7 @@ public class TeleOp extends OpMode {
         if (gamepad1.dpad_down)
             Target_Pos -= GSpeed;
 
-        Target_Pos = clamp(Target_Pos, 0, 160);
+        Target_Pos = clamp(Target_Pos, 0, 150);
         int Current_Pos = LGlis.getCurrentPosition();
         double power = pidf.calculate(Current_Pos, Target_Pos);
         power = clamp(power, -0.4, 0.4);
